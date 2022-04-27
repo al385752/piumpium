@@ -35,7 +35,7 @@ function createMenu(){
 }
 
 function clickStartA(){
-    game.state.start('menuEnd');
+    game.state.start('nivelA');
 
 }
 
