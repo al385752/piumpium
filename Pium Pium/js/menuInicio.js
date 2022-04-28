@@ -1,17 +1,16 @@
+let menuState = {
+    preload: preloadMenu,
+    create: createMenu,
+};
+
 let btnstartA;
 let btnstartB;
 let btnstartC;
 let btnabout;
 
-let menuState = {
-    preload: preloadMenu,
-    create: createMenu
-};
-
 function preloadMenu(){
     game.load.image('play', 'assets/imgs/startbutton.png');
     game.load.image('about', 'assets/imgs/aboutbutton.png');
-
 }
 
 function createMenu(){
