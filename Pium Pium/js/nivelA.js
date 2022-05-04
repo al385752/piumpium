@@ -32,6 +32,7 @@ let currentWaveText;
 function preloadA(){
     game.load.image('typist', 'assets/imgs/X.png');
     game.load.image('owp', 'assets/imgs/owp.png');
+    this.load.text('dictionaryA', 'assets/dictionaries/dictionaryA.json');
 }
 
 function createA(){
@@ -41,6 +42,8 @@ function createA(){
     currentWave = 1;
     //timeElapsed = ??
     owpsOnScreen = TOTAL_OWPs;
+    this.levelData = JSON.parse(this.game.cache.getText('dictionaryA'));
+    console.log(this.levelData);
     createTypist();
     activoOWP = false;
     createOWP();
@@ -132,7 +135,7 @@ function activateOWP(){
             let exactPointSpawn = owpWidth/2 + spawnerPoint;
             owp.reset(exactPointSpawn, 0);
             owp.body.velocity.x = 0;
-            owp.body.velocity.y = OWP_SPEED + 100;
+            owp.body.velocity.y = OWP_SPEED;
         }
     }    
 }
