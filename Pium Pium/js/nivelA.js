@@ -26,6 +26,8 @@ let owpsDeactivated;
 let owpsDeactivatedText;
 let timeElapsedText;
 let currentWaveText;
+let levelData;
+let waveSpeedGeneral;
 //let clock = new Date();
 //let initTime = Date.now();
 
@@ -39,11 +41,12 @@ function createA(){
     points = 100;
     correctLettersTyped = 0;
     owpsDeactivated = 0;
-    currentWave = 1;
+    currentWave = 0;
     //timeElapsed = ??
     owpsOnScreen = TOTAL_OWPs;
-    this.levelData = JSON.parse(this.game.cache.getText('dictionaryA'));
-    console.log(this.levelData);
+    levelData = JSON.parse(this.game.cache.getText('dictionaryA'));
+    waveSpeedGeneral = levelData.speed[0].S;
+    console.log(levelData);
     createTypist();
     activoOWP = false;
     createOWP();
@@ -76,7 +79,7 @@ function createTypist(){
 function resetOWP(item){
     console.log('muerto');
     owpsOnScreen = owpsOnScreen - 1;
-    console.log(owpsOnScreen);
+    console.log("quedan: " + owpsOnScreen);
     item.kill();
 }
 
@@ -88,8 +91,8 @@ function createOWP(){
     owps.callAll('anchor.setTo', 'anchor', 0.5, 0.5);
     owps.callAll('scale.setTo', 'scale', 0.1, 0.1);
     owps.setAll('checkWorldBounds', true);
-    game.time.events.loop(TIMER_RHYTHM, activateOWP, this);
-
+    //game.time.events.loop(TIMER_RHYTHM, activateOWP, this);
+    game.time.events.repeatCount(TIMER_RHYTHM, activateOWP, this);
 }
 
 function createHUD(){
@@ -103,29 +106,31 @@ function createHUD(){
         correctLettersTypedText = game.add.text(lettersTypedTextX, allY, 'Letters: ' + correctLettersTyped, styleHUD);
         owpsDeactivatedText = game.add.text(owpsDeactivatedTextX, allY, 'Deactivated: ' + owpsDeactivated, styleHUD);
         timeElapsedText = game.add.text(timeElapsedTextX, allY, 'Time elapsed: ' + Date.now(), styleHUD);
-        currentWaveText = game.add.text(currentWaveTextX, allY, 'Wave: ' + currentWave, styleHUD);
+        currentWaveText = game.add.text(currentWaveTextX, allY, 'Wave: ' + (currentWave + 1), styleHUD);
         currentWaveText.anchor.setTo(1, 0);
 }
 
 function updateA(){
     if(owpsOnScreen == 0){
-        console.log('xd');
+        console.log('entra');
         if(currentWave == MAX_WAVES){
             game.state.start('menuEnd');
         }
         else{
             currentWave += 1;
             owpsOnScreen = TOTAL_OWPs;
-            currentWaveText.text = 'Wave: ' + currentWave;
+            currentWaveText.text = 'Wave: ' + (currentWave + 1);
             //generar otra wave de enemigos, creo que es activateOWP() pero no estoy seguro
-            activateOWP();
+            waveSpeedGeneral = levelData.speed[currentWave].S;
+            activateOWP(waveSpeedGeneral);
+            console.log(waveSpeedGeneral);
         }
     }
     //game.physics.arcade.overlap(owps, typist, killTypist, null,this);
     timeElapsedText.text = 'Time elapsed: ' + game.time.totalElapsedSeconds();
 }
 
-function activateOWP(){
+function activateOWP(waveSpeed){
     if(Math.random() < 0.2){
         let owp = owps.getFirstExists(false);
         if(owp){
@@ -135,13 +140,9 @@ function activateOWP(){
             let spawnerPoint = Math.floor(Math.random() * spawnWidth);
             let exactPointSpawn = owpWidth/2 + spawnerPoint;
             owp.reset(exactPointSpawn, 0);
-            owp.body.velocity.x = 0;
-<<<<<<< HEAD
-            owp.body.velocity.y = OWP_SPEED;
-=======
-            owp.body.velocity.y = OWP_SPEED + 100;
-            game.physics.arcade.moveToObject(owp, typist);
->>>>>>> 8cd92556308fcdace398a6e89e76907f26046de3
+            //owp.body.velocity.x = 0;
+            //owp.body.velocity.y = waveSpeed;
+            game.physics.arcade.moveToObject(owp, typist, waveSpeed);
         }
     }    
 }
