@@ -89,6 +89,7 @@ function createOWP(){
     owps.callAll('scale.setTo', 'scale', 0.1, 0.1);
     owps.setAll('checkWorldBounds', true);
     game.time.events.loop(TIMER_RHYTHM, activateOWP, this);
+
 }
 
 function createHUD(){
@@ -135,7 +136,12 @@ function activateOWP(){
             let exactPointSpawn = owpWidth/2 + spawnerPoint;
             owp.reset(exactPointSpawn, 0);
             owp.body.velocity.x = 0;
+<<<<<<< HEAD
             owp.body.velocity.y = OWP_SPEED;
+=======
+            owp.body.velocity.y = OWP_SPEED + 100;
+            game.physics.arcade.moveToObject(owp, typist);
+>>>>>>> 8cd92556308fcdace398a6e89e76907f26046de3
         }
     }    
 }
