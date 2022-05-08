@@ -17,6 +17,7 @@ let timer;
 let anguloOWP;
 let activoOWP;
 let typist;
+let obj1;
 let owps;
 //HUD y tal
 let points; //para la pantalla de end
@@ -30,6 +31,7 @@ let currentWaveText;
 let levelData;
 let waveSpeedGeneral;
 let spawn;
+let gameTime;
 //let clock = new Date();
 //let initTime = Date.now();
 
@@ -43,7 +45,7 @@ function createA(){
     points = 100;
     correctLettersTyped = 0;
     owpsDeactivated = 0;
-    currentWave = 0;
+    currentWave = -1;
     //timeElapsed = ??
     owpsOnScreen = 0;
     levelData = JSON.parse(this.game.cache.getText('dictionaryA'));
@@ -53,6 +55,7 @@ function createA(){
     activoOWP = false;
     createOWP();
     createHUD();
+    timer = game.time.create(false);
 }
 
 function createTypist(){
@@ -62,6 +65,12 @@ function createTypist(){
     typist.anchor.setTo(0.5, 0.5);
     typist.scale.setTo(0.05, 0.05);
     game.physics.arcade.enable(typist);
+
+    obj1 = game.add.sprite(posicionJugadorX, posicionJugadorY, 'typist');
+    obj1.anchor.setTo(0.5, 0.5);
+    obj1.scale.setTo(0.05, 0.05);
+    obj1.visible = false;
+    
 }
 
 /*function createOWP(){
@@ -99,6 +108,8 @@ function createOWP(){
     //game.time.events.loop(TIMER_RHYTHM, activateOWP, this);
 }
 
+//crear la clase xd
+
 function createHUD(){
         let lettersTypedTextX = 5;
         let owpsDeactivatedTextX = game.world.width / 4;
@@ -130,17 +141,27 @@ function updateA(){
         }
     }
     if(spawn){
-        activateOWP(waveSpeedGeneral);
+        activateOWP();
         owpsOnScreen +=1;
         if(owpsOnScreen >=TOTAL_OWPs){
             spawn = false;
         }
     }
-    //game.physics.arcade.overlap(owps, typist, killTypist, null,this);
-    timeElapsedText.text = 'Time elapsed: ' + game.time.totalElapsedSeconds();
+    gameTime = game.time.totalElapsedSeconds();
+    game.physics.arcade.overlap(owps, typist, killTypist, null,this);
+    timeElapsedText.text = 'Time elapsed: ' + gameTime;
 }
 
-function activateOWP(waveSpeed){
+function activateOWP(){
+    //console.log('semen');
+    //timer.loop(Phaser.Timer.SECOND * 2, launchOWP(waveSpeedGeneral), this);
+    //timer.start();
+    launchOWP(waveSpeedGeneral);
+   
+}
+
+function launchOWP(waveSpeed){
+    
     let owp = owps.getFirstExists(false);
     if(owp){
         let gameWorldWidth = game.world.width;
@@ -151,11 +172,14 @@ function activateOWP(waveSpeed){
         owp.reset(exactPointSpawn, 0);
         //owp.body.velocity.x = 0;
         //owp.body.velocity.y = waveSpeed;
-        game.physics.arcade.moveToObject(owp, typist, waveSpeed);
+        obj1.x = obj1.x + (Math.random() * (50 + 50) - 50);
+        game.physics.arcade.moveToObject(owp, obj1, waveSpeed);
+        obj1.x = game.world.centerX;
     }
-   
 }
 
 function killTypist(owps, typist){
+    currentWave = 1;
+    gameTime = 0; //esto hay que verlo
     game.state.start('menuEnd');
 }
