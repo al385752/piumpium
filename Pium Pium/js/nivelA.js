@@ -10,7 +10,13 @@ class Owp{
         this.posY = posY;
         this.word= word;
         this.sprite = game.add.sprite(owpSprite);
+        this.sprite.scale.setTo(0.1, 0.1);
+        this.sprite.anchor.setTo(0.5, 0.5);
+        this.sprite.events.onOutOfBounds = resetOWP;
     }
+    /*set sprite(resetOWP){
+        this.sprite.events.onOutOfBounds = resetOWP;
+    }*/
     outScreen(){
         this.kill();
     }
@@ -74,9 +80,9 @@ function createA(){
     console.log(levelData);
 
     //FUNCIONES DE INICIALIZAR COSAS
+    createHUD();
     createTypist();
     createOWP();
-    createHUD();
 
     //EVENTO TIMEADO DE CAGAR MARCIANITOS
     let launchOWP = game.time.events.add(Phaser.Timer.SECOND * ratio, checkActivateOWP, this);
@@ -103,20 +109,18 @@ function createTypist(){
 function createOWP(){
     owps = game.add.group();
     owps.classType = Owp;
+    owps.enableBody = true;
     for(let i = 0; i < TOTAL_OWPs; i++){
         owps.add(new Owp(null, null, null, 'owp'));
-    }
-    console.log(owps);
-    for(let i = 0; i < owps.children.length; i++){
-        game.physics.arcade.enable( owps.children[i].sprite);
-        owps.children[i].sprite.events.onOutOfBounds = resetOWP;
-        owps.children[i].sprite.anchor.setTo(0.5, 0.5);
-        owps.children[i].sprite.scale.setTo(0.1, 0.1);
+        //console.log(owps);
+        //game.physics.arcade.enable(owps.children[i].sprite);
+        //owps.children[i].sprite.events.onOutOfBounds = resetOWP;
+        //owps.children[i].sprite.anchor.setTo(0.5, 0.5);
+        //owps.children[i].sprite.scale.setTo(0.1, 0.1);
         console.log(owps.children[i]);
     }
     timer = game.time.create(false);
     timer.start();
-
 }
 
 //INICIALIZAR HUD
@@ -154,7 +158,7 @@ function killTypist(owps, typist){
 
 
 //COMPRUEBA SI EL TIMER DEBE O NO TIRAR LOS OWP
-function checkActivateOWP (){
+function checkActivateOWP(){
     if(owpsOnScreen == 0){
         changeWave();
     }
