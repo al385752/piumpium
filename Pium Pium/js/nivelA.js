@@ -9,17 +9,24 @@ class Owp{
         this.posX = posX;
         this.posY = posY;
         this.word= word;
-        this.sprite = game.add.sprite(owpSprite);
-        this.sprite.scale.setTo(0.1, 0.1);
-        this.sprite.anchor.setTo(0.5, 0.5);
-        this.sprite.events.onOutOfBounds = resetOWP;
+        this.owpSprite = game.add.sprite(owpSprite);
+        this.owpSprite.scale.setTo(0.1, 0.1);
+        this.owpSprite.anchor.setTo(0.5, 0.5);
+        this.checkWorldBounds = true;
+        //this.sprite.events.onOutOfBounds.add(resetOWP, this);
     }
-    /*set sprite(resetOWP){
-        this.sprite.events.onOutOfBounds = resetOWP;
+    /*set posX(somePosX){
+        this.posX = somePosX;
     }*/
-    outScreen(){
-        this.kill();
+    /*set posY(somePosY){
+        this.posY = somePosY;
+    }*/
+    set owpSprite(someFunction){
+        this.owpSprite.events.onOutOfBounds.add(someFunction, this);
     }
+    /*set word(someWord){
+        this.word = someWord;
+    }*/
 }
 
 const APARICION_OWP_Y = -50;
@@ -112,6 +119,8 @@ function createOWP(){
     owps.enableBody = true;
     for(let i = 0; i < TOTAL_OWPs; i++){
         owps.add(new Owp(null, null, null, 'owp'));
+        console.log(owps);
+        owps.children[i].owpSprite(resetOWP);
         //console.log(owps);
         //game.physics.arcade.enable(owps.children[i].sprite);
         //owps.children[i].sprite.events.onOutOfBounds = resetOWP;
@@ -187,6 +196,7 @@ function activateOWP(waveSpeed, newWord){
         let owpWidth = owp.body.width;
         let spawnWidth = gameWorldWidth - owpWidth;
         let spawnerPoint = Math.floor(Math.random() * spawnWidth);
+        //owp.posX(spawnerPoint);
         let exactPointSpawn = owpWidth/2 + spawnerPoint;
         owp.reset(exactPointSpawn, 0);
         text = game.add.text(owp.x -40, owp.y, newWord, {font:'15px Arial', fill:'#FFFFFF'});
@@ -205,7 +215,7 @@ function resetOWP(item){
     console.log('muerto');
     owpsOnScreen = owpsOnScreen - 1;
     console.log("quedan: " + owpsOnScreen);
-    item.outScreen();
+    item.destroy();
 }
 
 function changeWave(){
