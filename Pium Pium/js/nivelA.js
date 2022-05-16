@@ -27,7 +27,10 @@ class Owp{
     /*set word(someWord){
         this.word = someWord;
     }*/
+
 }
+
+
 
 const APARICION_OWP_Y = -50;
 const TOTAL_OWPs = 5;
@@ -46,6 +49,7 @@ let ratio;
 let owpWord;
 let wordsUsed = [];
 let text;
+let typing;
 
 //HUD y tal
 let points; //para la pantalla de end
@@ -94,6 +98,8 @@ function createA(){
     //EVENTO TIMEADO DE CAGAR MARCIANITOS
     let launchOWP = game.time.events.add(Phaser.Timer.SECOND * ratio, checkActivateOWP, this);
     launchOWP.loop = true;
+
+    game.input.keyboard.onDownCallback = getKeyboardInput;
 }
 
 //INICIALIZAR PJ
@@ -151,7 +157,7 @@ function createHUD(){
 
 
 
-//LO QUE PASA MIENTRAS SE CORRE EL JUEGO (jaja se corre (sin ofender (fav si tu y yo)))
+//LO QUE PASA MIENTRAS SE CORRE EL JUEGO
 function updateA(){
     gameTime = game.time.totalElapsedSeconds();
     game.physics.arcade.overlap(owps, typist, killTypist, null,this);
@@ -163,6 +169,15 @@ function killTypist(owps, typist){
     currentWave = 1;
     gameTime = 0; //esto hay que verlo
     game.state.start('menuEnd');
+}
+
+
+//FUNCIÓN QUE RECOGE LAS TECLAS PULSADAS
+function getKeyboardInput(e){
+    if(e.KeyCode >= Phaser.Keyboard.A && e.KeyCode <= Phaser.Keyboard.z){
+        typing += e.Key;
+        console.log(typing);
+    }
 }
 
 
