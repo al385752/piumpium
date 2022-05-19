@@ -12,12 +12,14 @@ const MAX_WAVES = 10;
 const OWP_ANCHOR_X = 0.5;
 const OWP_ANCHOR_Y = 0.5;
 const OWP_SPEED = 10;
+const TEXT_OFFSET = 20;
 let anguloOWP;
 let activoOWP;
 let typist;
 let obj1;
 let owps;
 let ratio;
+let typing;
 
 //HUD y tal
 let points; //para la pantalla de end
@@ -32,6 +34,14 @@ let levelData;
 let waveSpeedGeneral;
 let spawn;
 let gameTime;
+let owpWord;
+let wordsUsed;
+let wordsGroup;
+let text;
+let i;
+
+
+
 
 //PRECARGAR DE IMAGENES LETRAS Y POLLAS
 function preloadA(){
@@ -49,9 +59,13 @@ function createA(){
     owpsOnScreen = 0;
     spawn = true;
     activoOWP = false;
+    typing = '';
+    i = 0;
 
     //COSAS DEL JSON
     levelData = JSON.parse(this.game.cache.getText('dictionaryA'));
+    owpWord = levelData.words[Math.floor(Math.random() * 24)].word;
+    wordsUsed = [];
     ratio = levelData.ratio[0].R;
     waveSpeedGeneral = levelData.speed[0].S;
     console.log(levelData);
@@ -59,11 +73,14 @@ function createA(){
     //FUNCIONES DE INICIALIZAR COSAS
     createTypist();
     createOWP();
+    createWords();
     createHUD();
 
     //EVENTO TIMEADO DE CAGAR MARCIANITOS
     let launchOWP = game.time.events.add(Phaser.Timer.SECOND * ratio, checkActivateOWP, this);
     launchOWP.loop = true;
+
+    game.input.keyboard.onDownCallback = getKeyboardInput;
 }
 
 //INICIALIZAR PJ
@@ -95,6 +112,14 @@ function createOWP(){
     timer.start();
 }
 
+function createWords(){
+    wordsGroup = game.add.group();
+    wordsGroup.enableBody = true;
+    for(let i = 0; i < 5; i++){
+        
+    }
+}
+
 //INICIALIZAR HUD
 function createHUD(){
     let lettersTypedTextX = 5;
@@ -119,7 +144,16 @@ function updateA(){
     gameTime = game.time.totalElapsedSeconds();
     game.physics.arcade.overlap(owps, typist, killTypist, null,this);
     timeElapsedText.text = 'Time elapsed: ' + gameTime;
+    /*if(owpsOnScreen > 0){
+        for(let i = 0; i < 5; i++){
+            wordsGroup.children[i].x = owps.children[i].x + TEXT_OFFSET;
+            wordsGroup.children[i].y = owps.children[i].y;
+        }
+    }*/
+    
 }
+
+
 
 //SUPONGO QUE ES LA FUNCION DE QUE TE MUERES
 function killTypist(owps, typist){
@@ -128,6 +162,12 @@ function killTypist(owps, typist){
     game.state.start('menuEnd');
 }
 
+function getKeyboardInput(e){
+    if(e.keyCode >= Phaser.Keyboard.A && e.keyCode <= Phaser.Keyboard.Z){
+        typing += e.key;
+        console.log(typing);
+    }
+}
 
 //COMPRUEBA SI EL TIMER DEBE O NO TIRAR LOS OWP
 function checkActivateOWP (){
@@ -135,7 +175,7 @@ function checkActivateOWP (){
         changeWave();
     }
     if(spawn){
-        activateOWP();
+        activateOWP(waveSpeedGeneral);
         owpsOnScreen +=1;
         if(owpsOnScreen >=TOTAL_OWPs){
             spawn = false;
@@ -154,10 +194,22 @@ function activateOWP(waveSpeed){
         let spawnerPoint = Math.floor(Math.random() * spawnWidth);
         let exactPointSpawn = owpWidth/2 + spawnerPoint;
         owp.reset(exactPointSpawn, 0);
+        //generar posición y palabra
+        owpWord = levelData.words[Math.floor(Math.random() * 24)].word;
+        while(wordsUsed.includes(owpWord)){
+            owpWord = levelData.words[Math.floor(Math.random() * 24)].word;
+        }
+        wordsGroup.add(game.add.text(owps.children[i].x + TEXT_OFFSET, owps.children[i].y, owpWord, {fontSize: '18px', fill: '#FFFFFF'}));
+        wordsGroup.children[i].body.velocity.setTo(owps.children[i].velocity.x, owps.children[i].velocity.y);
+        wordsUsed.push(owpWord);
+        console.log(wordsUsed);
+        //fin
         obj1.x = obj1.x + (Math.random() * (50 + 50) - 50);
         game.physics.arcade.moveToObject(owp, obj1, waveSpeed);
         obj1.x = game.world.centerX;
     }
+
+    i++;
 }
 
 //RESETEA LOS OWP QUE MUEREN
