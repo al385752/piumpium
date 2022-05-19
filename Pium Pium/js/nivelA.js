@@ -38,7 +38,7 @@ let owpWord;
 let wordsUsed;
 let wordsGroup;
 let text;
-let i;
+let owpCorrelation;
 
 
 
@@ -60,7 +60,7 @@ function createA(){
     spawn = true;
     activoOWP = false;
     typing = '';
-    i = 0;
+    owpCorrelation = 0;
 
     //COSAS DEL JSON
     levelData = JSON.parse(this.game.cache.getText('dictionaryA'));
@@ -115,9 +115,9 @@ function createOWP(){
 function createWords(){
     wordsGroup = game.add.group();
     wordsGroup.enableBody = true;
-    for(let i = 0; i < 5; i++){
-        
-    }
+    wordsGroup.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', resetWord);
+    wordsGroup.setAll('checkWorldBounds', true);
+    wordsGroup.setAll('outOfBoundsKill', true);
 }
 
 //INICIALIZAR HUD
@@ -199,17 +199,18 @@ function activateOWP(waveSpeed){
         while(wordsUsed.includes(owpWord)){
             owpWord = levelData.words[Math.floor(Math.random() * 24)].word;
         }
-        wordsGroup.add(game.add.text(owps.children[i].x + TEXT_OFFSET, owps.children[i].y, owpWord, {fontSize: '18px', fill: '#FFFFFF'}));
-        wordsGroup.children[i].body.velocity.setTo(owps.children[i].velocity.x, owps.children[i].velocity.y);
+        wordsGroup.add(game.add.text(owps.children[owpCorrelation].x + TEXT_OFFSET, owps.children[owpCorrelation].y, owpWord, {fontSize: '18px', fill: '#FFFFFF'}));
+        game.physics.arcade.moveToObject(wordsGroup.children[owpCorrelation], obj1, waveSpeed);
         wordsUsed.push(owpWord);
         console.log(wordsUsed);
+        console.log(wordsGroup.children);
         //fin
         obj1.x = obj1.x + (Math.random() * (50 + 50) - 50);
         game.physics.arcade.moveToObject(owp, obj1, waveSpeed);
         obj1.x = game.world.centerX;
     }
 
-    i++;
+    owpCorrelation++;
 }
 
 //RESETEA LOS OWP QUE MUEREN
@@ -217,6 +218,12 @@ function resetOWP(item){
     console.log('muerto');
     owpsOnScreen = owpsOnScreen - 1;
     console.log("quedan: " + owpsOnScreen);
+    item.kill();
+}
+
+
+function resetWord(item){
+    console.log('text fuera');
     item.kill();
 }
 
@@ -232,5 +239,6 @@ function changeWave(){
             waveSpeedGeneral = levelData.speed[currentWave].S;
             ratio = levelData.ratio[currentWave].R;
             console.log(waveSpeedGeneral);
+            owpCorrelation = 0;
         }
 }
