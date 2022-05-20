@@ -12,7 +12,7 @@ const MAX_WAVES = 10;
 const OWP_ANCHOR_X = 0.5;
 const OWP_ANCHOR_Y = 0.5;
 const OWP_SPEED = 10;
-const TEXT_OFFSET = 20;
+const TEXT_OFFSET = 5;
 let anguloOWP;
 let activoOWP;
 let typist;
@@ -115,9 +115,10 @@ function createOWP(){
 function createWords(){
     wordsGroup = game.add.group();
     wordsGroup.enableBody = true;
-    wordsGroup.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', resetWord);
-    wordsGroup.setAll('checkWorldBounds', true);
-    wordsGroup.setAll('outOfBoundsKill', true);
+    //wordsGroup.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', resetWord);
+    wordsGroup.callAll('anchor.setTo', 'anchor', 0.5, 0.5);
+    //wordsGroup.setAll('checkWorldBounds', true);
+    //wordsGroup.setAll('outOfBoundsKill', true);
 }
 
 //INICIALIZAR HUD
@@ -173,6 +174,12 @@ function getKeyboardInput(e){
 function checkActivateOWP (){
     if(owpsOnScreen == 0){
         changeWave();
+        owpCorrelation = 0;
+        /*for(let i = 0; i < TOTAL_OWPs; i++){
+            console.log(wordsGroup.children[i]);
+            wordsGroup.remove(wordsGroup.children[i]);
+        }*/
+        wordsGroup.removeAll();
     }
     if(spawn){
         activateOWP(waveSpeedGeneral);
@@ -224,7 +231,7 @@ function resetOWP(item){
 
 function resetWord(item){
     console.log('text fuera');
-    item.kill();
+    item.destroy();
 }
 
 function changeWave(){
@@ -239,6 +246,5 @@ function changeWave(){
             waveSpeedGeneral = levelData.speed[currentWave].S;
             ratio = levelData.ratio[currentWave].R;
             console.log(waveSpeedGeneral);
-            owpCorrelation = 0;
         }
 }
