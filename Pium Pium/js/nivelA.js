@@ -39,6 +39,8 @@ let wordsUsed;
 let wordsGroup;
 let text;
 let owpCorrelation;
+let lockedOwp;
+let lockedOwpLocation;
 
 
 
@@ -151,7 +153,9 @@ function updateA(){
             wordsGroup.children[i].y = owps.children[i].y;
         }
     }*/
-    
+    if(typing != ''){
+        aimOwp();
+    }
 }
 
 
@@ -247,4 +251,29 @@ function changeWave(){
             ratio = levelData.ratio[currentWave].R;
             console.log(waveSpeedGeneral);
         }
+}
+
+function aimOwp(){
+    let i = 0;
+    while(i < TOTAL_OWPs){
+        if(typing == wordsGroup.children[i].text[0]){
+            lockedOwpLocation = i;
+            wordsGroup.children[i].text.slice(1);
+            typing = '';
+            i = TOTAL_OWPs;
+        }
+        i++;
+    }
+    let owpLength = wordsGroup.children[lockedOwpLocation].text.length;
+    while(owpLength < 0){
+        if(typing == wordsGroup.children[lockedOwpLocation].text[0]){
+            typing = '';
+            lockedOwp.text.slice(1);
+            owpLength--;
+        }
+        else{
+            typing = '';
+        }
+    }
+    resetOWP(owps.children[lockedOwpLocation]);
 }
