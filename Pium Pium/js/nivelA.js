@@ -20,6 +20,9 @@ let obj1;
 let owps;
 let ratio;
 let typing;
+let words;
+let spawned;
+let killed;
 
 //HUD y tal
 let points; //para la pantalla de end
@@ -67,14 +70,16 @@ function createA(){
     owpCorrelation = 0;
     waveChange = false;
     owpsPerWave = TOTAL_OWPs;
+    spawned = 0;
+    killed = 0;
 
     //COSAS DEL JSON
     levelData = JSON.parse(this.game.cache.getText('dictionaryA'));
+    words = createWordlist(levelData);
     owpWord = levelData.words[Math.floor(Math.random() * 24)].word;
     wordsUsed = [];
     ratio = levelData.ratio[0].R;
     waveSpeedGeneral = levelData.speed[0].S;
-    console.log(levelData);
 
     //FUNCIONES DE INICIALIZAR COSAS
     createTypist();
@@ -155,39 +160,38 @@ function updateA(){
     }
 }
 
-
-
-//SUPONGO QUE ES LA FUNCION DE QUE TE MUERES
-function killTypist(owps, typist){
-    currentWave = 1;
-    gameTime = 0; //esto hay que verlo
-    game.state.start('menuEnd');
-}
-
-function getKeyboardInput(e){
-    if(e.keyCode >= Phaser.Keyboard.A && e.keyCode <= Phaser.Keyboard.Z){
-        typing += e.key;
-        console.log(typing);
-    }
-}
-
-//COMPRUEBA SI EL TIMER DEBE O NO TIRAR LOS OWP
-function checkActivateOWP (){
-    if(owpsPerWave == 0 && owpsOnScreen <= 0){
-        changeWave();
-        
-    }
-    if(spawn){
-        activateOWP(waveSpeedGeneral);
-        owpsPerWave -= 1;
-        owpsOnScreen +=1;
-        if(owpsPerWave == 0){
-            spawn = false;
-            owpsPerWave = TOTAL_OWPs;
+//VALE, LO DE ANTES ERA UN LIO Y A VER QUE TAL AHORA
+function manageOwps(){
+    if(spawn){ //SI SE PUEDEN SPAWNEAR LOS SPAWNEA
+        for(let i = 0; i < TOTAL_OWPs; i++){
+            activateOWP(waveSpeedGeneral);
+            spawned ++;
+            console.log(spawned);
         }
+    if (spawned ==TOTAL_OWPs){ //SI SE HAN SPAWNEADO LOS 5 PARA
+        spawn= false;
+    }
+    }
+    if (killed == TOTAL_OWPs){ //SI SE HAN MUERTO LOS 5 PASAMOS DE WAVE (changeWace pone spawn a true y resetea spawed y killed)
+        changeWave();
     }
 }
-
+function changeWave(){  
+    if(currentWave == MAX_WAVES){
+        game.state.start('menuEnd');
+    }
+    else{
+        owpCorrelation = 0;
+        currentWave += 1;
+        spawned = 0;
+        killed = 0;
+        spawn = true;
+        wordsGroup.removeAll();
+        currentWaveText.text = 'Wave: ' + (currentWave + 1);
+        waveSpeedGeneral = levelData.speed[currentWave].S;
+        ratio = levelData.ratio[currentWave].R;
+    }
+}
 //FUNCIÓN QUE CREA LOS OWP Y LOS TIRA
 function activateOWP(waveSpeed){
     
@@ -217,6 +221,38 @@ function activateOWP(waveSpeed){
     }
     owpCorrelation++;
 }
+//COMPRUEBA SI EL TIMER DEBE O NO TIRAR LOS OWP
+function checkActivateOWP (){
+    if(owpsPerWave == 0 && owpsOnScreen <= 0){
+        changeWave();
+        
+    }
+    if(spawn){
+        activateOWP(waveSpeedGeneral);
+        owpsPerWave -= 1;
+        owpsOnScreen +=1;
+        if(owpsPerWave == 0){
+            spawn = false;
+            owpsPerWave = TOTAL_OWPs;
+        }
+    }
+}
+
+
+//SUPONGO QUE ES LA FUNCION DE QUE TE MUERES
+function killTypist(owps, typist){
+    currentWave = 1;
+    gameTime = 0; //esto hay que verlo
+    game.state.start('menuEnd');
+}
+
+function getKeyboardInput(e){
+    if(e.keyCode >= Phaser.Keyboard.A && e.keyCode <= Phaser.Keyboard.Z){
+        typing += e.key;
+        console.log(typing);
+    }
+}
+
 
 //RESETEA LOS OWP QUE MUEREN
 function resetOWP(item){
@@ -230,19 +266,7 @@ function resetWord(item){
     item.destroy();
 }
 
-function changeWave(){  
-    if(currentWave == MAX_WAVES){
-        game.state.start('menuEnd');
-    }
-    else{
-        owpCorrelation = 0;
-        wordsGroup.removeAll();
-        currentWave += 1;
-        currentWaveText.text = 'Wave: ' + (currentWave + 1);
-        waveSpeedGeneral = levelData.speed[currentWave].S;
-        ratio = levelData.ratio[currentWave].R;
-    }
-}
+
 
 function aimOwp(){
     let i = 0;
@@ -267,4 +291,20 @@ function aimOwp(){
         }
     }
     resetOWP(owps.children[lockedOwpLocation]);
+}
+
+//FUNCIÓN PARA CREAR UNA LISTA DESORDENADA DE PALABRAS COMO SERES HUMANOS DECENTES
+function createWordlist(jason){
+    let wordsArray = [];
+    for(i=0; i < 24; i++){
+        wordsArray.push(levelData.words[i].word);
+    }
+    //RANDOMIZAR EL ARRAY (JAVASCRIPT NO TIENE RANDOMSORT, USAMOS FISHER YATES)
+    for(let i = wordsArray.length-1; i > 0; i--){
+        let j = Math.floor(Math.random *i);
+        let k = wordsArray[i];
+        wordsArray[i]= wordsArray[j];
+        wordsArray[j]=k;
+    }
+    return wordsArray;
 }
