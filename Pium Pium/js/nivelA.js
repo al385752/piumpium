@@ -66,7 +66,7 @@ function createA(){
     typing = '';
     owpCorrelation = 0;
     waveChange = false;
-    owpsPerWave = 5;
+    owpsPerWave = TOTAL_OWPs;
 
     //COSAS DEL JSON
     levelData = JSON.parse(this.game.cache.getText('dictionaryA'));
@@ -150,12 +150,6 @@ function updateA(){
     gameTime = game.time.totalElapsedSeconds();
     game.physics.arcade.collide(owps, typist, killTypist, null,this);
     timeElapsedText.text = 'Time elapsed: ' + gameTime;
-    /*if(owpsOnScreen > 0){
-        for(let i = 0; i < 5; i++){
-            wordsGroup.children[i].x = owps.children[i].x + TEXT_OFFSET;
-            wordsGroup.children[i].y = owps.children[i].y;
-        }
-    }*/
     if(typing != ''){
         aimOwp();
     }
@@ -179,24 +173,17 @@ function getKeyboardInput(e){
 
 //COMPRUEBA SI EL TIMER DEBE O NO TIRAR LOS OWP
 function checkActivateOWP (){
-    if(owpsOnScreen == 0){
+    if(owpsPerWave == 0 && owpsOnScreen <= 0){
         changeWave();
-        owpCorrelation = 0;
-        /*for(let i = 0; i < TOTAL_OWPs; i++){
-            console.log(wordsGroup.children[i]);
-            wordsGroup.remove(wordsGroup.children[i]);
-        }*/
-        wordsGroup.removeAll();
+        
     }
     if(spawn){
         activateOWP(waveSpeedGeneral);
-        owpsOnScreen +=1;
         owpsPerWave -= 1;
-        waveChange = false;
-        if(owpsPerWave = 0){
+        owpsOnScreen +=1;
+        if(owpsPerWave == 0){
             spawn = false;
-            waveChange = true;
-            owpsPerWave = 5;
+            owpsPerWave = TOTAL_OWPs;
         }
     }
 }
@@ -212,6 +199,7 @@ function activateOWP(waveSpeed){
         let spawnerPoint = Math.floor(Math.random() * spawnWidth);
         let exactPointSpawn = owpWidth/2 + spawnerPoint;
         owp.reset(exactPointSpawn, 0);
+        
         //generar posición y palabra
         owpWord = levelData.words[Math.floor(Math.random() * 24)].word;
         while(wordsUsed.includes(owpWord)){
@@ -221,6 +209,7 @@ function activateOWP(waveSpeed){
         game.physics.arcade.moveToObject(wordsGroup.children[owpCorrelation], obj1, waveSpeed);
         wordsUsed.push(owpWord);
         console.log(wordsGroup.children);
+
         //fin
         obj1.x = obj1.x + (Math.random() * (50 + 50) - 50);
         game.physics.arcade.moveToObject(owp, obj1, waveSpeed);
@@ -231,8 +220,8 @@ function activateOWP(waveSpeed){
 
 //RESETEA LOS OWP QUE MUEREN
 function resetOWP(item){
-    owpsOnScreen = owpsOnScreen - 1;
     item.kill();
+    owpsOnScreen -=1;
 }
 
 
@@ -242,18 +231,17 @@ function resetWord(item){
 }
 
 function changeWave(){  
-    if(waveChange){
-        if(currentWave == MAX_WAVES){
-            game.state.start('menuEnd');
-        }
-        else{
-            spawn = true;
-            currentWave += 1;
-            currentWaveText.text = 'Wave: ' + (currentWave + 1);
-            waveSpeedGeneral = levelData.speed[currentWave].S;
-            ratio = levelData.ratio[currentWave].R;
-        }
-    }  
+    if(currentWave == MAX_WAVES){
+        game.state.start('menuEnd');
+    }
+    else{
+        owpCorrelation = 0;
+        wordsGroup.removeAll();
+        currentWave += 1;
+        currentWaveText.text = 'Wave: ' + (currentWave + 1);
+        waveSpeedGeneral = levelData.speed[currentWave].S;
+        ratio = levelData.ratio[currentWave].R;
+    }
 }
 
 function aimOwp(){
