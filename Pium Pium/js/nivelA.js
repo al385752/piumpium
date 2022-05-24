@@ -43,6 +43,7 @@ let lockedOwp;
 let lockedOwpLocation;
 let waveChange;
 let owpsPerWave;
+let wordList
 
 
 
@@ -75,6 +76,7 @@ function createA(){
     ratio = levelData.ratio[0].R;
     waveSpeedGeneral = levelData.speed[0].S;
     console.log(levelData);
+    wordList = createWordlist();
 
     //FUNCIONES DE INICIALIZAR COSAS
     createTypist();
@@ -120,10 +122,8 @@ function createOWP(){
 function createWords(){
     wordsGroup = game.add.group();
     wordsGroup.enableBody = true;
-    //wordsGroup.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', resetWord);
+    selectWords();
     wordsGroup.callAll('anchor.setTo', 'anchor', 0.5, 0.5);
-    //wordsGroup.setAll('checkWorldBounds', true);
-    //wordsGroup.setAll('outOfBoundsKill', true);
 }
 
 //INICIALIZAR HUD
@@ -150,15 +150,17 @@ function updateA(){
     gameTime = game.time.totalElapsedSeconds();
     game.physics.arcade.collide(owps, typist, killTypist, null,this);
     timeElapsedText.text = 'Time elapsed: ' + gameTime;
+    updateTextPosition();
     /*if(owpsOnScreen > 0){
         for(let i = 0; i < 5; i++){
             wordsGroup.children[i].x = owps.children[i].x + TEXT_OFFSET;
             wordsGroup.children[i].y = owps.children[i].y;
         }
     }*/
-    if(typing != ''){
+/*    if(typing != ''){
         aimOwp();
     }
+    */
 }
 
 
@@ -186,7 +188,6 @@ function checkActivateOWP (){
             console.log(wordsGroup.children[i]);
             wordsGroup.remove(wordsGroup.children[i]);
         }*/
-        wordsGroup.removeAll();
     }
     if(spawn){
         activateOWP(waveSpeedGeneral);
@@ -211,9 +212,10 @@ function activateOWP(waveSpeed){
         let spawnWidth = gameWorldWidth - owpWidth;
         let spawnerPoint = Math.floor(Math.random() * spawnWidth);
         let exactPointSpawn = owpWidth/2 + spawnerPoint;
+        wordsGroup.children[owpCorrelation].visible = true;
         owp.reset(exactPointSpawn, 0);
         //generar posición y palabra
-        owpWord = levelData.words[Math.floor(Math.random() * 24)].word;
+/*        owpWord = levelData.words[Math.floor(Math.random() * 24)].word;
         while(wordsUsed.includes(owpWord)){
             owpWord = levelData.words[Math.floor(Math.random() * 24)].word;
         }
@@ -221,7 +223,7 @@ function activateOWP(waveSpeed){
         game.physics.arcade.moveToObject(wordsGroup.children[owpCorrelation], obj1, waveSpeed);
         wordsUsed.push(owpWord);
         console.log(wordsGroup.children);
-        //fin
+        fin*/
         obj1.x = obj1.x + (Math.random() * (50 + 50) - 50);
         game.physics.arcade.moveToObject(owp, obj1, waveSpeed);
         obj1.x = game.world.centerX;
@@ -249,6 +251,7 @@ function changeWave(){
         else{
             spawn = true;
             currentWave += 1;
+            selectWords();
             currentWaveText.text = 'Wave: ' + (currentWave + 1);
             waveSpeedGeneral = levelData.speed[currentWave].S;
             ratio = levelData.ratio[currentWave].R;
@@ -256,7 +259,7 @@ function changeWave(){
     }  
 }
 
-function aimOwp(){
+/*function aimOwp(){
     let i = 0;
     while(i < TOTAL_OWPs){
         if(typing == wordsGroup.children[i].text[0]){
@@ -267,16 +270,50 @@ function aimOwp(){
         }
         i++;
     }
-    let owpLength = wordsGroup.children[lockedOwpLocation].text.length;
-    while(owpLength < 0){
-        if(typing == wordsGroup.children[lockedOwpLocation].text[0]){
-            typing = '';
-            lockedOwp.text.slice(1);
-            owpLength--;
-        }
-        else{
-            typing = '';
+    if(lockedOwpLocation != null){
+        let owpLength = wordsGroup.children[lockedOwpLocation].text.length;
+        while(owpLength < 0){
+            if(typing == wordsGroup.children[lockedOwpLocation].text[0]){
+                typing = '';
+                lockedOwp.text.slice(1);
+                owpLength--;
+            }
+            else{
+                typing = '';
+            }
         }
     }
     resetOWP(owps.children[lockedOwpLocation]);
+}*/
+
+function createWordlist(jason){
+    let wordsArray = [];
+    for(i=0; i < 24; i++){
+        wordsArray.push(levelData.words[i].word);
+    }
+    //RANDOMIZAR EL ARRAY (JAVASCRIPT NO TIENE RANDOMSORT, USAMOS FISHER YATES)
+    for(let i = wordsArray.length-1; i > 0; i--){
+        let j = Math.floor(Math.random() * i);
+        let k = wordsArray[i];
+        wordsArray[i]= wordsArray[j];
+        wordsArray[j]=k;
+    }
+    return wordsArray;
+}
+
+//GETS 5 WORDS AND ASSIGN THEM TO A GROUP 
+function selectWords(){
+    for(let i = 0; i < TOTAL_OWPs; i++){
+        let word = wordList.pop();
+        wordsGroup.addChild(game.add.text(0, 0, word, {fontSize: '18px', fill: '#FFFFFF'}));
+        wordsGroup.children[i].visible = false;
+    }
+}
+
+function updateTextPosition(){
+    for(let i = 0; i < TOTAL_OWPs; i++){
+        wordsGroup.children[i].x = owps.children[i].x + TEXT_OFFSET;
+        wordsGroup.children[i].y = owps.children[i].y + TEXT_OFFSET;
+    }
+    
 }
