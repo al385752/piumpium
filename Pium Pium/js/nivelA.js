@@ -43,7 +43,7 @@ let lockedOwp;
 let lockedOwpLocation;
 let waveChange;
 let owpsPerWave;
-let wordList
+let wordList;
 
 
 
@@ -59,6 +59,7 @@ function preloadA(){
 function createA(){
     points = 100;
     correctLettersTyped = 0;
+    totalLettersTyped = 0;
     owpsDeactivated = 0;
     currentWave = -1;
     owpsOnScreen = 0;
@@ -68,6 +69,7 @@ function createA(){
     owpCorrelation = 0;
     waveChange = false;
     owpsPerWave = 5;
+    lockedOwp = false;
 
     //COSAS DEL JSON
     levelData = JSON.parse(this.game.cache.getText('dictionaryA'));
@@ -98,7 +100,7 @@ function createTypist(){
     typist = game.add.sprite (posicionJugadorX, posicionJugadorY, 'typist');
     typist.anchor.setTo(0.5, 0.5);
     typist.scale.setTo(0.05, 0.05);
-    game.physics.arcade.enable(typist);
+    //game.physics.arcade.enable(typist);
 
     obj1 = game.add.sprite(posicionJugadorX, posicionJugadorY, 'typist');
     obj1.anchor.setTo(0.5, 0.5);
@@ -124,6 +126,7 @@ function createWords(){
     wordsGroup.enableBody = true;
     selectWords();
     wordsGroup.callAll('anchor.setTo', 'anchor', 0.5, 0.5);
+    wordsGroup.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', killWord);
 }
 
 //INICIALIZAR HUD
@@ -138,7 +141,7 @@ function createHUD(){
     correctLettersTypedText = game.add.text(lettersTypedTextX, allY, 'Letters: ' + correctLettersTyped, styleHUD);
     owpsDeactivatedText = game.add.text(owpsDeactivatedTextX, allY, 'Deactivated: ' + owpsDeactivated, styleHUD);
     timeElapsedText = game.add.text(timeElapsedTextX, allY, 'Time elapsed: ' + Date.now(), styleHUD);
-    currentWaveText = game.add.text(currentWaveTextX, allY, 'Wave: ' + (currentWave + 1), styleHUD);
+    currentWaveText = game.add.text(currentWaveTextX, allY, 'Wave: ' + (currentWave + 2), styleHUD);
     currentWaveText.anchor.setTo(1, 0);
 }
 
@@ -151,6 +154,9 @@ function updateA(){
     game.physics.arcade.collide(owps, typist, killTypist, null,this);
     timeElapsedText.text = 'Time elapsed: ' + gameTime;
     updateTextPosition();
+    if(typing != ''){
+        type();
+    }  
     /*if(owpsOnScreen > 0){
         for(let i = 0; i < 5; i++){
             wordsGroup.children[i].x = owps.children[i].x + TEXT_OFFSET;
@@ -310,10 +316,57 @@ function selectWords(){
     }
 }
 
+function killWord(item){
+    item.kill();
+}
+
 function updateTextPosition(){
     for(let i = 0; i < TOTAL_OWPs; i++){
         wordsGroup.children[i].x = owps.children[i].x + TEXT_OFFSET;
         wordsGroup.children[i].y = owps.children[i].y + TEXT_OFFSET;
     }
     
+}
+
+function type(){
+    if(lockedOwp == true){
+        pressKey();
+    }
+    else{
+        searchObjective();
+    }
+}
+
+
+function pressKey(){
+    if(typing == wordsGroup.children[lockedOwpLocation].text[0]){
+        console.log('hola');
+        wordsGroup.children[lockedOwpLocation].text.slice(1);
+        console.log(wordsGroup.children[lockedOwpLocation].text);
+        if(wordsGroup.children[lockedOwpLocation].text.length <= 0){
+            owpsDeactivated++;
+            lockedOwp = false;
+            resetOWP();
+        }
+        correctLettersTyped++;
+        totalLettersTyped++;
+    }
+    else{
+        totalLettersTyped++;
+    }
+    typing = '';
+}
+
+function searchObjective(){
+    for(let i = 0; i < TOTAL_OWPs; i++){
+        if(wordsGroup.children[i].text[0] == typing){
+            lockedOwp = true;
+            lockedOwpLocation = i;
+            wordsGroup.children[i].text.slice(1);
+            correctLettersTyped++;
+            totalLettersTyped++;
+        }
+    }
+    totalLettersTyped++;
+    typing = '';
 }

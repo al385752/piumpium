@@ -15,8 +15,8 @@ function createEnd(){
     let endStyle = {font:'50px Arial', fill:'#FFFFFF'}
     let gameover = game.add.text(100, 50, endText, endStyle);
 
-    let pointsText = 100 * (correctLettersTyped / totalLettersTyped);;
-    let pointsStyle = {font:'25px Arial', fill:'#FFFFFF'}
+    let pointsText = Math.floor(100 * (correctLettersTyped / totalLettersTyped));
+    let pointsStyle = {font:'25px Arial', fill:'#FFFFFF'};
     let finalPoints = game.add.text(100, 200, pointsText, pointsStyle);
 
     btnrestart = game.add.button(200, 400, 'restart', returnMenu);
