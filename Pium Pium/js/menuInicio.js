@@ -8,6 +8,7 @@ let btnstartB;
 let btnstartC;
 let btnabout;
 let stage;
+let points;
 
 function preloadMenu(){
     game.load.image('play', 'assets/imgs/startbutton.png');

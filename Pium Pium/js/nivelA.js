@@ -1,39 +1,21 @@
 Phaser.Physics.ARCADE;
 
-const APARICION_OWP_Y = -50;
 const TOTAL_OWPs = 5;
-let currentWave;
-const MAX_WAVES = 9;
-const OWP_ANCHOR_X = 0.5;
-const OWP_ANCHOR_Y = 0.5;
-const OWP_SPEED = 10;
-const TEXT_OFFSET = 5;
+const MAX_WAVES = 5;
+const TEXT_OFFSET = 15;
 const RADIANDS_CONVERSION = 180/Math.PI;
-const ANGLE_DEVIATION = 90;
-let anguloOWP;
-let activoOWP;
+const ANGLE_DEVIATION_TYPIST = 90;
+const ANGLE_DEVIATION_OWP = 270;
 let typist;
+let bullets;
 let obj1;
 let owps;
 let ratio;
 let muertos;
-
-//HUD y tal
-let points; //para la pantalla de end
-let correctLettersTyped;
-let correctLettersTypedText;
-let totalLettersTyped;
-let owpsDeactivated;
-let owpsDeactivatedText;
-let timeElapsedText;
-let currentWaveText;
+let currentWave;
 let levelData;
 let waveSpeedGeneral;
-let gameTime;
-let owpWord;
-let wordsUsed;
 let wordsGroup;
-let text;
 let lockedOwp;
 let lockedOwpLocation;
 let wordList;
@@ -49,24 +31,23 @@ let aState = {
 function preloadA(){
     game.load.image('typist', 'assets/imgs/flecha.png');
     game.load.image('owp', 'assets/imgs/owp.png');
+    game.load.image('bullet', 'assets/imgs/X.png');
     this.load.text('dictionaryA', 'assets/dictionaries/dictionaryA.json');
 }
 
 //INICIALIZAR VARIABLES Y FUNCIONES BÁSICAS
 function createA(){
-    activoOWP = false;
     lockedOwp = false;
 
     //COSAS DEL JSON
     levelData = JSON.parse(this.game.cache.getText('dictionaryA'));
-    owpWord = levelData.words[Math.floor(Math.random() * 24)].word;
-    console.log(currentWave);
     initializeWave(currentWave);
 
     //FUNCIONES DE INICIALIZAR COSAS
     createTypist();
     createOWP();
     createWords();
+    bullets = game.add.group();
 
     //EVENTO TIMEADO DE CAGAR MARCIANITOS
     game.time.events.repeat(Phaser.Timer.SECOND * ratio, TOTAL_OWPs, activateOWP, this, waveSpeedGeneral);
@@ -79,7 +60,7 @@ function createTypist(){
     let posicionJugadorX = game.world.centerX;
     let posicionJugadorY = game.world.height - 50;
     typist = game.add.sprite (posicionJugadorX, posicionJugadorY, 'typist');
-    typist.anchor.setTo(0.5, 0.5);
+    typist.anchor.setTo(0.5);
     typist.scale.setTo(0.25, 0.25);
     game.physics.arcade.enable(typist);
 
@@ -96,10 +77,9 @@ function createOWP(){
     owps.enableBody = true;
     owps.setAll('Phaser.Physics.ARCADE', true);
     /*owps.setAll('body.collideWorldBounds', true);
-    rebote comentado
     owps.setAll('body.bounce', 1);*/
-    owps.callAll('anchor.setTo', 'anchor', 0.5, 0.5);
-    owps.callAll('scale.setTo', 'scale', 0.1, 0.1);
+    owps.callAll('anchor.setTo', 'anchor', 0.5);
+    owps.callAll('scale.setTo', 'scale', 0.05, 0.05);
     timer = game.time.create(false);
     timer.start();
 }
@@ -113,7 +93,6 @@ function createWords(){
 }
 
 function initializeWave(w){
-    console.log(w);
     muertos = 0;
     ratio = levelData.ratio[w - 1].R;
     waveSpeedGeneral = levelData.speed[w - 1].S;
@@ -125,7 +104,8 @@ function initializeWave(w){
 
 //LO QUE PASA MIENTRAS SE CORRE EL JUEGO (jaja se corre (sin ofender (fav si tu y yo)))
 function updateA(){
-    game.physics.arcade.collide(owps, typist, killTypist, null,this);
+    game.physics.arcade.overlap(owps, typist, killTypist, null,this);
+    game.physics.arcade.overlap(bullets.children, owps.children, owpHit, null, this);
     updateTextPosition();  
 }
 
@@ -155,6 +135,7 @@ function activateOWP(waveSpeed){
         wordsGroup.children[owps.children.indexOf(owp)].visible = true;
         owp.reset(exactPointSpawn, 0);
         obj1.x = obj1.x + (Math.random() * (50 + 50) - 50);
+        aimOwp(owps.children.indexOf(owp));
         game.physics.arcade.moveToObject(owp, obj1, waveSpeed);
         obj1.x = game.world.centerX;
     }
@@ -240,6 +221,7 @@ function checkKey(e){
     if(e == wordsGroup.children[lockedOwpLocation].text[0]){
         wordsGroup.children[lockedOwpLocation].setText(wordsGroup.children[lockedOwpLocation].text.substr(1));
         aimTypist(lockedOwpLocation);
+        createBullet(owps.children[lockedOwpLocation]);
         if(wordsGroup.children[lockedOwpLocation].text.length <= 0){
             owpsDeactivated++;
             lockedOwp = false;
@@ -267,9 +249,42 @@ function aimTypist(position){
     let x = owp.x - typist.x;
     let y = owp.y - typist.y;
     let typistAngle = Math.atan2(y, x) * RADIANDS_CONVERSION;
-    typist.angle = typistAngle + ANGLE_DEVIATION;
+    typist.angle = typistAngle + ANGLE_DEVIATION_TYPIST;
+}
+
+function aimOwp(position){
+    let owp = owps.children[position];
+    let x = typist.x - owp.x;
+    let y = typist.y - owp.y;
+    let owpAngle = Math.atan2(y, x) * RADIANDS_CONVERSION;
+    owp.angle = owpAngle + ANGLE_DEVIATION_OWP;
 }
 
 function resetAimTypist(){
     typist.angle = 0;
 }
+
+function createBullet(target){
+    let bullet = game.add.sprite(typist.x, typist.y, 'bullet');
+    bullet.anchor.setTo(0.5);
+    bullet.scale.setTo(0.03);
+    game.physics.enable(bullet, Phaser.Physics.ARCADE);
+    bullets.addChild(bullet);
+    game.physics.arcade.moveToObject(bullet, target, waveSpeedGeneral * 50);
+}
+
+function owpHit(bullet, target){
+    /*if(wordsGroup.children[owps.indexOf(target)].){
+
+    }
+    else{
+        target.velocity = 0;
+        game.time.events.add(1000, resumeOwp, this, target);
+    }*/
+    bullets.removeChild(bullet);
+    bullet.destroy();
+}
+
+/*function resumeOwp(item){
+    item.velocity = waveSpeedGeneral;
+}*/
