@@ -7,6 +7,7 @@ let btnstartA;
 let btnstartB;
 let btnstartC;
 let btnabout;
+let stage;
 
 function preloadMenu(){
     game.load.image('play', 'assets/imgs/startbutton.png');
@@ -33,9 +34,20 @@ function createMenu(){
 
 }
 
-function clickStartA(){
-    game.state.start('nivelA');
+function initializeStage(){
+    correctLettersTyped = 0;
+    totalLettersTyped = 0;
+    owpsDeactivated = 0;
+    currentWave = 1;
+    points = 100;
+    wordsUsed = [];
+    game.time.reset();
+}
 
+function clickStartA(){
+    stage = 'A';
+    initializeStage();
+    game.state.start('nivelA');
 }
 
 function clickStartB(){
