@@ -1,5 +1,3 @@
-let btnrestart;
-
 let endState = {
     preload: preloadEnd,
     create: createEnd
@@ -7,20 +5,39 @@ let endState = {
 
 function preloadEnd(){
     game.load.image('restart', 'assets/imgs/backbutton.png');
-
+    game.load.image('background', 'assets/imgs/background.png');
 }
 
 function createEnd(){
-    let endText ="Has Perdido pringao";
-    let endStyle = {font:'50px Arial', fill:'#FFFFFF'}
-    let gameover = game.add.text(100, 50, endText, endStyle);
+    let background = game.add.image(-5, 0, 'background');
+    background.scale.setTo(0.75);
 
-    let pointsText = Math.floor(100 * (correctLettersTyped / totalLettersTyped));
-    let pointsStyle = {font:'25px Arial', fill:'#FFFFFF'};
-    let finalPoints = game.add.text(100, 200, pointsText, pointsStyle);
+    if(typistDead){
+        let endText ="Tucans have eaten your banana!!";
+        let endStyle = {font:'50px Arial', fill:'#e3e046', backgroundColor:'#fc9814'}
+        let gameOver = game.add.text(game.world.centerX, game.world.centerY - 150, endText, endStyle);
+        gameOver.anchor.setTo(0.5);
+    }
+    else{
+        let endText = 'Level ' + level + ' completed! Monke happy';
+        let endStyle = {font:'50px Comic Sans MS', fill:'#e3e046', backgroundColor:'#fc9814'}
+        let gameOver = game.add.text(game.world.centerX, game.world.centerY - 150, endText, endStyle);
+        gameOver.anchor.setTo(0.5);
+    }
+    
+    if(totalLettersTyped == 0){
+        pointsText = 'Accuracy: 0';
+    }
+    else{
+        pointsText = 'Accuracy: ' + Math.floor(100 * (correctLettersTyped / totalLettersTyped));
+    }
+    let pointsStyle = {font:'25px Comic Sans MS', fill:'#e3e046', backgroundColor:'#fc9814'};
+    let finalPoints = game.add.text(game.world.centerX, game.world.centerY, pointsText, pointsStyle);
+    finalPoints.anchor.setTo(0.5);
 
-    btnrestart = game.add.button(200, 400, 'restart', returnMenu);
-    btnrestart.scale.setTo(0.15);
+    let btnRestart = game.add.button(game.world.centerX, game.world.centerY + 170, 'restart', returnMenu);
+    btnRestart.scale.setTo(0.1);
+    btnRestart.anchor.setTo(0.5);
 }
 
 function returnMenu(){

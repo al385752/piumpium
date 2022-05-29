@@ -7,32 +7,44 @@ let btnstartA;
 let btnstartB;
 let btnstartC;
 let btnabout;
-let stage;
+let background;
+let level;
 let points;
+let correctLettersTyped;
+let totalLettersTyped;
+let typistDead;
 
 function preloadMenu(){
     game.load.image('play', 'assets/imgs/startbutton.png');
     game.load.image('about', 'assets/imgs/aboutbutton.png');
+    game.load.image('background', 'assets/imgs/background.png');
 }
 
 function createMenu(){
-    let text1 = "Pium Pium";
-    let style1 = {font:'30px Arial', fill:'#FFFFFF'};
-    let title = game.add.text(50, 50, text1, style1);
+    background = game.add.image(-5, 0, 'background');
+    background.scale.setTo(0.75);
 
-    btnstartA = game.add.button(100, 120, 'play', clickStartA);
-    btnstartA.scale.setTo(0.25);
+    let text1 = "Monkey Adventure";
+    let style1 = {font:'80px Comic Sans MS', fill:'#e3e046', backgroundColor:'#fc9814'};
+    let title = game.add.text(game.world.centerX, game.world.centerY - 150, text1, style1);
+    title.anchor.set(0.5);
 
-    btnstartB = game.add.button(100, 200, 'play', clickStartB);
-    btnstartB.scale.setTo(0.25);
+    btnstartA = game.add.button(game.world.centerX, game.world.centerY - 40, 'play', clickStartA);
+    btnstartA.scale.setTo(0.15);
+    btnstartA.anchor.setTo(0.5);
 
-    btnstartC = game.add.button(100, 280, 'play', clickStartC);
-    btnstartC.scale.setTo(0.25);
+    btnstartB = game.add.button(game.world.centerX, game.world.centerY + 60, 'play', clickStartB);
+    btnstartB.scale.setTo(0.15);
+    btnstartB.anchor.setTo(0.5);
+
+    btnstartC = game.add.button(game.world.centerX, game.world.centerY + 160, 'play', clickStartC);
+    btnstartC.scale.setTo(0.15);
+    btnstartC.anchor.setTo(0.5);
 
 
-    btnabout = game.add.button(100, 350, 'about', clickAbout);
-    btnabout.scale.setTo(0.5);
-
+    btnabout = game.add.button(game.world.centerX, game.world.centerY + 250, 'about', clickAbout);
+    btnabout.scale.setTo(0.25);
+    btnabout.anchor.setTo(0.5);
 }
 
 function initializeStage(){
@@ -41,12 +53,13 @@ function initializeStage(){
     owpsDeactivated = 0;
     currentWave = 1;
     points = 100;
+    typistDead = false;
     wordsUsed = [];
     game.time.reset();
 }
 
 function clickStartA(){
-    stage = 'A';
+    level = 'A';
     initializeStage();
     game.state.start('nivelA');
 }

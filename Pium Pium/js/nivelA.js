@@ -1,7 +1,7 @@
 Phaser.Physics.ARCADE;
 
 const TOTAL_OWPs = 5;
-const MAX_WAVES = 5;
+const MAX_WAVES = 4;
 const TEXT_OFFSET = 15;
 const RADIANDS_CONVERSION = 180/Math.PI;
 const ANGLE_DEVIATION_TYPIST = 90;
@@ -30,13 +30,17 @@ let aState = {
 //PRECARGAR DE IMAGENES LETRAS Y POLLAS
 function preloadA(){
     game.load.image('typist', 'assets/imgs/flecha.png');
-    game.load.image('owp', 'assets/imgs/owp.png');
+    game.load.image('owp', 'assets/imgs/square.png');
     game.load.image('bullet', 'assets/imgs/X.png');
     this.load.text('dictionaryA', 'assets/dictionaries/dictionaryA.json');
+    game.load.image('background', 'assets/imgs/background.png');
 }
 
 //INICIALIZAR VARIABLES Y FUNCIONES BÁSICAS
 function createA(){
+    let background = game.add.image(-5, 0, 'background');
+    background.scale.setTo(0.75);
+
     lockedOwp = false;
 
     //COSAS DEL JSON
@@ -76,10 +80,11 @@ function createOWP(){
     owps.createMultiple(TOTAL_OWPs, 'owp');
     owps.enableBody = true;
     owps.setAll('Phaser.Physics.ARCADE', true);
-    /*owps.setAll('body.collideWorldBounds', true);
-    owps.setAll('body.bounce', 1);*/
+    owps.setAll('body.collideWorldBounds', true);
+    owps.setAll('body.bounce', 0.8);
     owps.callAll('anchor.setTo', 'anchor', 0.5);
     owps.callAll('scale.setTo', 'scale', 0.05, 0.05);
+    owps.y = 25;
     timer = game.time.create(false);
     timer.start();
 }
@@ -96,7 +101,9 @@ function initializeWave(w){
     muertos = 0;
     ratio = levelData.ratio[w - 1].R;
     waveSpeedGeneral = levelData.speed[w - 1].S;
-    wordList = createWordlist();
+    if(w == 1){
+        wordList = createWordlist();
+    }
 }
 
 
@@ -113,6 +120,7 @@ function updateA(){
 
 //SUPONGO QUE ES LA FUNCION DE QUE TE MUERES
 function killTypist(owps, typist){
+    typistDead = true;
     game.state.start('menuEnd');
 }
 
@@ -155,7 +163,6 @@ function resetOWP(item){
 
 //RESET USED WORDS
 function resetWord(item){
-    console.log('text fuera');
     item.remove();
 }
 
@@ -171,7 +178,7 @@ function changeWave(){
 }
 
 //CREATE AN ARRAY OF WORDS
-function createWordlist(jason){
+function createWordlist(){
     let wordsArray = [];
     for(i=0; i < 24; i++){
         wordsArray.push(levelData.words[i].word);
@@ -274,17 +281,6 @@ function createBullet(target){
 }
 
 function owpHit(bullet, target){
-    /*if(wordsGroup.children[owps.indexOf(target)].){
-
-    }
-    else{
-        target.velocity = 0;
-        game.time.events.add(1000, resumeOwp, this, target);
-    }*/
     bullets.removeChild(bullet);
     bullet.destroy();
 }
-
-/*function resumeOwp(item){
-    item.velocity = waveSpeedGeneral;
-}*/
