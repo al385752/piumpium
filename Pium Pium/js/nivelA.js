@@ -30,49 +30,50 @@ let aState = {
 };
 
 
-//PRECARGAR DE IMAGENES LETRAS Y POLLAS
+//PRELOADING ASSETS
 function preloadA(){
-    game.load.image('typist', 'assets/imgs/flecha.png');
-    game.load.image('owp', 'assets/imgs/square.png');
-    game.load.image('bullet', 'assets/imgs/X.png');
-    this.load.text('dictionaryA', 'assets/dictionaries/dictionaryA.json');
+    game.load.text('dictionaryA', 'assets/dictionaries/dictionaryA.json');
     game.load.image('background', 'assets/imgs/background.png');
     game.load.audio('bonk', 'assets/sounds/bonk.mp3');
     game.load.audio('boom', 'assets/sounds/boom.mp3');
     game.load.audio('typistDead', 'assets/sounds/typistDead.mp3');
+    game.load.spritesheet('monkey', 'assets/imgs/Monkey.png',94,128);
+    game.load.spritesheet('toucan', 'assets/imgs/Toucan.png', 131,98);
 }
 
-//INICIALIZAR VARIABLES Y FUNCIONES BÁSICAS
+//INITIALIZE VARIABLES AND BASIC FUNCTIONS
 function createA(){
     let background = game.add.image(-5, 0, 'background');
     background.scale.setTo(0.75);
 
     lockedOwp = false;
 
-    //COSAS DEL JSON
+    //WORD JASON
     levelData = JSON.parse(this.game.cache.getText('dictionaryA'));
     initializeWave(currentWave);
 
-    //FUNCIONES DE INICIALIZAR COSAS
+    //FUNCTIONS TO INITIALIZE OBJECTS
     createTypist();
     createOWP();
     createWords();
     bullets = game.add.group();
 
-    //EVENTO TIMEADO DE CAGAR MARCIANITOS
+    //SPAWNING OWP TIMED EVENT
     game.time.events.repeat(Phaser.Timer.SECOND * ratio, TOTAL_OWPs, activateOWP, this, waveSpeedGeneral);
 
+    //KEYBOARD INPUTS DECLARATION
     game.input.keyboard.onDownCallback = getKeyboardInput;
 }
 
-//INICIALIZAR PJ
+//INITIALIZE PC
 function createTypist(){
     let posicionJugadorX = game.world.centerX;
     let posicionJugadorY = game.world.height - 50;
-    typist = game.add.sprite (posicionJugadorX, posicionJugadorY, 'typist');
+    typist = game.add.sprite (posicionJugadorX, posicionJugadorY, 'monkey');
     typist.anchor.setTo(0.5);
-    typist.scale.setTo(0.25, 0.25);
+    typist.scale.setTo(0.5, 0.5);
     game.physics.arcade.enable(typist);
+    typist.animations.add('monkey');
 
     obj1 = game.add.sprite(posicionJugadorX, posicionJugadorY, 'typist');
     obj1.anchor.setTo(0.5, 0.5);
@@ -80,21 +81,22 @@ function createTypist(){
     obj1.visible = false;
 }
 
-//DECLARAR CLASE OWP
+//DECLARE OWP CLASS
 function createOWP(){
     owps = game.add.physicsGroup();
-    owps.createMultiple(TOTAL_OWPs, 'owp');
+    owps.createMultiple(TOTAL_OWPs, 'toucan');
     owps.enableBody = true;
     owps.setAll('Phaser.Physics.ARCADE', true);
     owps.setAll('body.collideWorldBounds', true);
     owps.setAll('body.bounce', 0.8);
     owps.callAll('anchor.setTo', 'anchor', 0.5);
-    owps.callAll('scale.setTo', 'scale', 0.05, 0.05);
+    owps.callAll('scale.setTo', 'scale', 0.3, 0.3);
     owps.y = 25;
     timer = game.time.create(false);
     timer.start();
 }
 
+//CREATE A GROUP FOR THE WORDS
 function createWords(){
     wordsGroup = game.add.group();
     wordsGroup.enableBody = true;
@@ -103,6 +105,7 @@ function createWords(){
     wordsGroup.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', resetWord);
 }
 
+//FUNCTION TO START A WAVE
 function initializeWave(w){
     muertos = 0;
     ratio = levelData.ratio[w - 1].R;
@@ -115,7 +118,7 @@ function initializeWave(w){
 
 
 
-//LO QUE PASA MIENTRAS SE CORRE EL JUEGO (jaja se corre (sin ofender (fav si tu y yo)))
+//ACTUAL GAME FUNCTIONS
 function updateA(){
     game.physics.arcade.overlap(owps, typist, killTypist, null,this);
     game.physics.arcade.overlap(bullets.children, owps.children, owpHit, null, this);
@@ -124,7 +127,7 @@ function updateA(){
 
 
 
-//SUPONGO QUE ES LA FUNCION DE QUE TE MUERES
+//FUNCTION FOR DYING
 function killTypist(owps, typist){
     typistDeadSound = game.add.sound('typistDead', 0.5);
     typistDeadSound.play();
@@ -132,6 +135,7 @@ function killTypist(owps, typist){
     game.state.start('menuEnd');
 }
 
+//GET KEYBOARD INPUTS
 function getKeyboardInput(e){
     if(e.keyCode >= Phaser.Keyboard.A && e.keyCode <= Phaser.Keyboard.Z){
         console.log(e.key);
@@ -143,6 +147,7 @@ function getKeyboardInput(e){
 function activateOWP(waveSpeed){
     let owp = owps.getFirstExists(false);
     if(owp){
+        owp.animations.add('toucan');
         let gameWorldWidth = game.world.width;
         let owpWidth = owp.body.width;
         let spawnWidth = gameWorldWidth - owpWidth;
@@ -154,6 +159,7 @@ function activateOWP(waveSpeed){
         aimOwp(owps.children.indexOf(owp));
         game.physics.arcade.moveToObject(owp, obj1, waveSpeed);
         obj1.x = game.world.centerX;
+        owp.play('toucan', 12, true, false);
     }
 }
 
@@ -238,7 +244,8 @@ function checkKey(e){
     if(e == wordsGroup.children[lockedOwpLocation].text[0]){
         wordsGroup.children[lockedOwpLocation].setText(wordsGroup.children[lockedOwpLocation].text.substr(1));
         aimTypist(lockedOwpLocation);
-        createBullet(owps.children[lockedOwpLocation]);
+        createBullet(owps.children[lockedOwpLocation]); 
+        typist.play('monkey', 20);
         if(wordsGroup.children[lockedOwpLocation].text.length <= 0){
             owpsDeactivated++;
             lockedOwp = false;
@@ -261,6 +268,7 @@ function searchObjective(e){
     }
 }
 
+//ROTATE TYPIST TO AIM AT OWPS
 function aimTypist(position){
     let owp = owps.children[position];
     let x = owp.x - typist.x;
@@ -269,6 +277,7 @@ function aimTypist(position){
     typist.angle = typistAngle + ANGLE_DEVIATION_TYPIST;
 }
 
+//SEEK WICH OWP ARE YOU AIMING
 function aimOwp(position){
     let owp = owps.children[position];
     let x = typist.x - owp.x;
@@ -277,19 +286,22 @@ function aimOwp(position){
     owp.angle = owpAngle + ANGLE_DEVIATION_OWP;
 }
 
+//RESETS BACK THE TYPIST
 function resetAimTypist(){
     typist.angle = 0;
 }
 
+//CREATE A BULLET TO SHOOT AT OWP
 function createBullet(target){
     let bullet = game.add.sprite(typist.x, typist.y, 'bullet');
     bullet.anchor.setTo(0.5);
-    bullet.scale.setTo(0.03);
+    bullet.scale.setTo(0.5);
     game.physics.enable(bullet, Phaser.Physics.ARCADE);
     bullets.addChild(bullet);
     game.physics.arcade.moveToObject(bullet, target, waveSpeedGeneral * 100);
 }
 
+//BULLET COLIDES WITH OWPS
 function owpHit(bullet, target){
     bonkSound = game.add.sound('bonk', 0.5);
     bonkSound.play();
