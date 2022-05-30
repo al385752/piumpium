@@ -6,11 +6,14 @@ let endState = {
 function preloadEnd(){
     game.load.image('restart', 'assets/imgs/backbutton.png');
     game.load.image('background', 'assets/imgs/background.png');
+    game.load.audio('monke', 'assets/sounds/monkeyHappy.mp3');
 }
 
 function createEnd(){
     let background = game.add.image(-5, 0, 'background');
     background.scale.setTo(0.75);
+
+    backgroundMusic.stop();
 
     if(typistDead){
         let endText ="Tucans have eaten your banana!!";
@@ -23,6 +26,8 @@ function createEnd(){
         let endStyle = {font:'50px Comic Sans MS', fill:'#e3e046', backgroundColor:'#fc9814'}
         let gameOver = game.add.text(game.world.centerX, game.world.centerY - 150, endText, endStyle);
         gameOver.anchor.setTo(0.5);
+        let monkeyAudio = game.add.audio('monke', 0.8);
+        monkeyAudio.play();
     }
     
     if(totalLettersTyped == 0){

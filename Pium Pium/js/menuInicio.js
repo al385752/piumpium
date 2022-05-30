@@ -8,6 +8,7 @@ let btnstartB;
 let btnstartC;
 let btnabout;
 let background;
+let backgroundMusic;
 let level;
 let points;
 let correctLettersTyped;
@@ -18,6 +19,7 @@ function preloadMenu(){
     game.load.image('play', 'assets/imgs/startbutton.png');
     game.load.image('about', 'assets/imgs/aboutbutton.png');
     game.load.image('background', 'assets/imgs/background.png');
+    game.load.audio('backgroundMusic', 'assets/sounds/backgroundMusic.mp3');
 }
 
 function createMenu(){
@@ -55,6 +57,8 @@ function initializeStage(){
     points = 100;
     typistDead = false;
     wordsUsed = [];
+    backgroundMusic = game.add.sound('backgroundMusic', 0.5);
+    backgroundMusic.play();
     game.time.reset();
 }
 

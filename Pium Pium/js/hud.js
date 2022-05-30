@@ -17,7 +17,7 @@ function createHUD(){
     text.anchor.setTo(0.5);
     text = game.add.text(game.world.centerX, game.world.centerY - 20, 'Correct letters: ' + correctLettersTyped, {font: '25px Comic Sans MS', fill:'#e3e046', backgroundColor:'#fc9814'});
     text.anchor.setTo(0.5);
-    text = game.add.text(game.world.centerX, game.world.centerY + 40, 'Deactivated tucans: ' + owpsDeactivated, {font: '25px Comic Sans MS', fill:'#e3e046', backgroundColor:'#fc9814'});
+    text = game.add.text(game.world.centerX, game.world.centerY + 40, 'Tucans defeated: ' + owpsDeactivated, {font: '25px Comic Sans MS', fill:'#e3e046', backgroundColor:'#fc9814'});
     text.anchor.setTo(0.5);
     game.time.events.add(4000, backToStage, this);
 }

@@ -19,6 +19,9 @@ let wordsGroup;
 let lockedOwp;
 let lockedOwpLocation;
 let wordList;
+let bonkSound;
+let boomSound;
+let typistDeadSound;
 
 let aState = {
     preload: preloadA,
@@ -34,6 +37,9 @@ function preloadA(){
     game.load.image('bullet', 'assets/imgs/X.png');
     this.load.text('dictionaryA', 'assets/dictionaries/dictionaryA.json');
     game.load.image('background', 'assets/imgs/background.png');
+    game.load.audio('bonk', 'assets/sounds/bonk.mp3');
+    game.load.audio('boom', 'assets/sounds/boom.mp3');
+    game.load.audio('typistDead', 'assets/sounds/typistDead.mp3');
 }
 
 //INICIALIZAR VARIABLES Y FUNCIONES BÁSICAS
@@ -120,6 +126,8 @@ function updateA(){
 
 //SUPONGO QUE ES LA FUNCION DE QUE TE MUERES
 function killTypist(owps, typist){
+    typistDeadSound = game.add.sound('typistDead', 0.5);
+    typistDeadSound.play();
     typistDead = true;
     game.state.start('menuEnd');
 }
@@ -151,6 +159,8 @@ function activateOWP(waveSpeed){
 
 //RESET DEAD OWP
 function resetOWP(item){
+    boomSound = game.add.sound('boom', 0.1);
+    boomSound.play();
     muertos += 1;
     let i = owps.children.indexOf(item);
     let word = wordsGroup.children[i];
@@ -277,10 +287,12 @@ function createBullet(target){
     bullet.scale.setTo(0.03);
     game.physics.enable(bullet, Phaser.Physics.ARCADE);
     bullets.addChild(bullet);
-    game.physics.arcade.moveToObject(bullet, target, waveSpeedGeneral * 50);
+    game.physics.arcade.moveToObject(bullet, target, waveSpeedGeneral * 100);
 }
 
 function owpHit(bullet, target){
+    bonkSound = game.add.sound('bonk', 0.5);
+    bonkSound.play();
     bullets.removeChild(bullet);
     bullet.destroy();
 }
