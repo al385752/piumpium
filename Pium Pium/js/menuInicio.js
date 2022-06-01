@@ -35,13 +35,13 @@ function createMenu(){
     btnstartA.scale.setTo(0.15);
     btnstartA.anchor.setTo(0.5);
 
-    btnstartB = game.add.button(game.world.centerX, game.world.centerY + 60, 'play', clickStartB);
+    /*btnstartB = game.add.button(game.world.centerX, game.world.centerY +the game 60, 'play', clickStartB);
     btnstartB.scale.setTo(0.15);
     btnstartB.anchor.setTo(0.5);
 
     btnstartC = game.add.button(game.world.centerX, game.world.centerY + 160, 'play', clickStartC);
     btnstartC.scale.setTo(0.15);
-    btnstartC.anchor.setTo(0.5);
+    btnstartC.anchor.setTo(0.5);*/
 
 
     btnabout = game.add.button(game.world.centerX, game.world.centerY + 250, 'about', clickAbout);
@@ -56,7 +56,6 @@ function initializeStage(){
     currentWave = 1;
     points = 100;
     typistDead = false;
-    wordsUsed = [];
     backgroundMusic = game.add.sound('backgroundMusic', 0.5);
     backgroundMusic.play();
     game.time.reset();

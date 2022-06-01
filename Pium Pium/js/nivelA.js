@@ -3,9 +3,12 @@ Phaser.Physics.ARCADE;
 const TOTAL_OWPs = 5;
 const MAX_WAVES = 4;
 const TEXT_OFFSET = 15;
+const PLAYER_OFFSET = 50;
+const OWPS_OFFSET = 25;
 const RADIANDS_CONVERSION = 180/Math.PI;
 const ANGLE_DEVIATION_TYPIST = 90;
 const ANGLE_DEVIATION_OWP = 270;
+const TOTAL_WORDS = 24;
 let typist;
 let bullets;
 let obj1;
@@ -34,6 +37,7 @@ let aState = {
 function preloadA(){
     game.load.text('dictionaryA', 'assets/dictionaries/dictionaryA.json');
     game.load.image('background', 'assets/imgs/background.png');
+    game.load.image('bullet', 'assets/imgs/X.png')
     game.load.audio('bonk', 'assets/sounds/bonk.mp3');
     game.load.audio('boom', 'assets/sounds/boom.mp3');
     game.load.audio('typistDead', 'assets/sounds/typistDead.mp3');
@@ -67,15 +71,15 @@ function createA(){
 
 //INITIALIZE PC
 function createTypist(){
-    let posicionJugadorX = game.world.centerX;
-    let posicionJugadorY = game.world.height - 50;
-    typist = game.add.sprite (posicionJugadorX, posicionJugadorY, 'monkey');
+    let PlayerPositionX = game.world.centerX;
+    let PlayerPositionY = game.world.height - PLAYER_OFFSET;
+    typist = game.add.sprite (PlayerPositionX, PlayerPositionY, 'monkey');
     typist.anchor.setTo(0.5);
     typist.scale.setTo(0.5, 0.5);
     game.physics.arcade.enable(typist);
     typist.animations.add('monkey');
 
-    obj1 = game.add.sprite(posicionJugadorX, posicionJugadorY, 'typist');
+    obj1 = game.add.sprite(PlayerPositionX, PlayerPositionY, 'monkey');
     obj1.anchor.setTo(0.5, 0.5);
     obj1.scale.setTo(0.05, 0.05);
     obj1.visible = false;
@@ -91,7 +95,7 @@ function createOWP(){
     owps.setAll('body.bounce', 0.8);
     owps.callAll('anchor.setTo', 'anchor', 0.5);
     owps.callAll('scale.setTo', 'scale', 0.3, 0.3);
-    owps.y = 25;
+    owps.y = OWPS_OFFSET;
     timer = game.time.create(false);
     timer.start();
 }
@@ -102,7 +106,6 @@ function createWords(){
     wordsGroup.enableBody = true;
     selectWords();
     wordsGroup.callAll('anchor.setTo', 'anchor', 0.5, 0.5);
-    wordsGroup.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', resetWord);
 }
 
 //FUNCTION TO START A WAVE
@@ -128,7 +131,7 @@ function updateA(){
 
 
 //FUNCTION FOR DYING
-function killTypist(owps, typist){
+function killTypist(){
     typistDeadSound = game.add.sound('typistDead', 0.5);
     typistDeadSound.play();
     typistDead = true;
@@ -138,7 +141,6 @@ function killTypist(owps, typist){
 //GET KEYBOARD INPUTS
 function getKeyboardInput(e){
     if(e.keyCode >= Phaser.Keyboard.A && e.keyCode <= Phaser.Keyboard.Z){
-        console.log(e.key);
         type(e.key);
     }
 }
@@ -163,6 +165,15 @@ function activateOWP(waveSpeed){
     }
 }
 
+//SELECT DIRECTION FOR THE OWPs
+function aimOwp(position){
+    let owp = owps.children[position];
+    let x = typist.x - owp.x;
+    let y = typist.y - owp.y;
+    let owpAngle = Math.atan2(y, x) * RADIANDS_CONVERSION;
+    owp.angle = owpAngle + ANGLE_DEVIATION_OWP;
+}
+
 //RESET DEAD OWP
 function resetOWP(item){
     boomSound = game.add.sound('boom', 0.1);
@@ -177,10 +188,7 @@ function resetOWP(item){
     }
 }
 
-//RESET USED WORDS
-function resetWord(item){
-    item.remove();
-}
+
 
 //CHANGE WAVE
 function changeWave(){  
@@ -196,7 +204,7 @@ function changeWave(){
 //CREATE AN ARRAY OF WORDS
 function createWordlist(){
     let wordsArray = [];
-    for(i=0; i < 24; i++){
+    for(i=0; i < TOTAL_WORDS; i++){
         wordsArray.push(levelData.words[i].word);
     }
     //RANDOMIZE ARRAY (JAVASCRIPT DOESN'T HAVE RANDOMSORT, WE USE FISHER YATES)
@@ -209,7 +217,7 @@ function createWordlist(){
     return wordsArray;
 }
 
-//GETS 5 WORDS AND ASSIGN THEM TO A GROUP 
+//GETS WORDS AND ASSIGN THEM TO A GROUP 
 function selectWords(){
     for(let i = 0; i < TOTAL_OWPs; i++){
         let word = wordList.pop();
@@ -247,7 +255,6 @@ function checkKey(e){
         createBullet(owps.children[lockedOwpLocation]); 
         typist.play('monkey', 20);
         if(wordsGroup.children[lockedOwpLocation].text.length <= 0){
-            owpsDeactivated++;
             lockedOwp = false;
             resetOWP(owps.children[lockedOwpLocation]);
             resetAimTypist();
@@ -277,19 +284,11 @@ function aimTypist(position){
     typist.angle = typistAngle + ANGLE_DEVIATION_TYPIST;
 }
 
-//SEEK WICH OWP ARE YOU AIMING
-function aimOwp(position){
-    let owp = owps.children[position];
-    let x = typist.x - owp.x;
-    let y = typist.y - owp.y;
-    let owpAngle = Math.atan2(y, x) * RADIANDS_CONVERSION;
-    owp.angle = owpAngle + ANGLE_DEVIATION_OWP;
-}
-
 //RESETS BACK THE TYPIST
 function resetAimTypist(){
     typist.angle = 0;
 }
+
 
 //CREATE A BULLET TO SHOOT AT OWP
 function createBullet(target){
@@ -302,7 +301,7 @@ function createBullet(target){
 }
 
 //BULLET COLIDES WITH OWPS
-function owpHit(bullet, target){
+function owpHit(bullet){
     bonkSound = game.add.sound('bonk', 0.5);
     bonkSound.play();
     bullets.removeChild(bullet);
