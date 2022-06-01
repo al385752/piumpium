@@ -297,7 +297,7 @@ function createBullet(target){
     bullet.scale.setTo(0.5);
     game.physics.enable(bullet, Phaser.Physics.ARCADE);
     bullets.addChild(bullet);
-    game.physics.arcade.moveToObject(bullet, target, waveSpeedGeneral * 100);
+    game.physics.arcade.moveToObject(bullet, target, 1000);
 }
 
 //BULLET COLIDES WITH OWPS
