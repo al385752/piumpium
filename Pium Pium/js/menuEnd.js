@@ -15,6 +15,8 @@ function createEnd(){
 
     backgroundMusic.stop();
 
+    //IF THE PLAYER HAS BEEN KILLED IN THE GAME, TEXT AND AUDIO WILL CHANGE
+
     if(typistDead){
         let endText ="Tucans have eaten your banana!!";
         let endStyle = {font:'50px Arial', fill:'#e3e046', backgroundColor:'#fc9814'}

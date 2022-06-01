@@ -22,6 +22,7 @@ function createHUD(){
     game.time.events.add(4000, backToStage, this);
 }
 
+//WHEN HUD HAS BEEN ON SCREEN FOR 4 SECONDS, ALL OF IT IS REMOVED AND RESUMES THE LEVEL BEING PLAYED
 function backToStage(){
     game.world.removeAll();
     game.state.start('nivel' + level);

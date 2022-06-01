@@ -49,6 +49,7 @@ function createMenu(){
     btnabout.anchor.setTo(0.5);
 }
 
+//INITIALIZES THE CURRENT VARIABLES FOR THE CHOSEN LEVEL
 function initializeStage(){
     correctLettersTyped = 0;
     totalLettersTyped = 0;
@@ -67,13 +68,13 @@ function clickStartA(){
     game.state.start('nivelA');
 }
 
-function clickStartB(){
+/*function clickStartB(){
 
 }
 
 function clickStartC(){
 
-}
+}*/
 
 function clickAbout(){
     game.state.start('menuAbout');
